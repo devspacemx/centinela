@@ -23,9 +23,10 @@ SOFTWARE.
 """
 
 
-import os
-import csv
 import configparser
+import csv
+import os
+
 from . import database
 
 
@@ -70,7 +71,7 @@ def migrate():
                             break
 
                 tracker = database.ReactionRoleCreationTracker(
-                    guild=None, database=f"{folder}/reactionlight.db"
+                    guild=None, database=f"{folder}/centinela.db"
                 )
 
                 print(f"Getting target channel: {channel_id}")

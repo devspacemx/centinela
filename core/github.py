@@ -29,7 +29,7 @@ from urllib.request import urlopen
 def get_latest():
     # Get latest version string from GitHub
     data = urlopen(
-        "https://raw.githubusercontent.com/eibex/reaction-light/master/.version"
+        "https://raw.githubusercontent.com/devspacemx/centinela/master/.version"
     )
     for line in data:
         latest = line.decode()

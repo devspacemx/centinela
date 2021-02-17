@@ -42,7 +42,7 @@ def initialize(database):
     cursor.execute("CREATE TABLE IF NOT EXISTS 'cleanup_queue_guilds' ('guild_id' INT, 'unix_timestamp' INT);")
     cursor.execute("CREATE TABLE IF NOT EXISTS 'dbinfo' ('version' INT);")
     cursor.execute(
-        "CREATE TABLE IF NOT EXISTS 'guild_settings' ('guild_id' INT, 'notify' INT, 'systemchannel' INT);"
+        "CREATE TABLE IF NOT EXISTS 'guild_settings' ('guild_id' INT, 'notify' INT, 'systemchannel' INT, 'welcomechannel' INT);"
     )
     cursor.execute(
         "CREATE UNIQUE INDEX IF NOT EXISTS guild_id_idx ON guild_settings (guild_id);"
@@ -297,6 +297,23 @@ class Database:
         except sqlite3.Error as e:
             return e
 
+    def add_welcomeChannel(self, guild_id, channel_id):
+        try:
+            conn = sqlite3.connect(self.database)
+            cursor = conn.cursor()
+            notify = 0
+            cursor.execute(
+                "INSERT OR IGNORE INTO guild_settings ('guild_id', 'welcomechannel')"
+                " values(?, ?);",
+                (guild_id, channel_id),
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+        except sqlite3.Error as e:
+            return e
+
     def add_systemchannel(self, guild_id, channel_id):
         try:
             conn = sqlite3.connect(self.database)
@@ -336,6 +353,21 @@ class Database:
             conn.commit()
             cursor.close()
             conn.close()
+
+        except sqlite3.Error as e:
+            return e
+
+    def fetch_welcomeChannel(self, guild_id):
+        try:
+            conn = sqlite3.connect(self.database)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT welcomechannel FROM guild_settings WHERE guild_id = ?;", (guild_id,)
+            )
+            result = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return result
 
         except sqlite3.Error as e:
             return e

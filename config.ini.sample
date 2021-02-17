@@ -1,7 +1,7 @@
 [server]
 token =
-prefix = rl!
-name = Reaction Light
-system_channel =
-logo = https://cdn.discordapp.com/attachments/671738683623473163/693451064904515645/spell_holy_weaponmastery.jpg
-colour = 0xffff00
+prefix = !centinela
+name = Centinela
+system_channel = 
+logo = https://cdn.discordapp.com/avatars/811426222563000330/733ec8a517406de359560bf3fe595429.png?size=256
+colour = 00A2DF
