@@ -1,6 +1,6 @@
 [server]
 token =
-prefix = !centinela
+prefix = centinela!
 name = Centinela
 system_channel = 
 logo = https://cdn.discordapp.com/avatars/811426222563000330/733ec8a517406de359560bf3fe595429.png?size=256

@@ -50,13 +50,11 @@ class Help(commands.Cog):
                 f"- `{prefix}kill` shuts down the bot.\n"
                 f"- `{prefix}restart` restarts the bot. Only works on installations"
                 " running on GNU/Linux.\n"
-                f"- `{prefix}update` updates the bot and restarts it. Only works on"
-                " `git clone` installations running on GNU/Linux.\n"
                 f"- `{prefix}version` reports the bot's current version and the latest"
                 " available one from GitHub.\n\n"
-                f"{botname} is running version {__version__} of Reaction Light. You can"
+                f"{botname} is running version {__version__} of Centinela. You can"
                 " find more resources, submit feedback, and report bugs at: "
-                "<https://github.com/eibex/reaction-light>"
+                "<https://github.com/devspacemx/centinela>"
             )
         else:
             await ctx.send("You do not have an admin role.")
