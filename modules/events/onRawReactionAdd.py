@@ -1,7 +1,7 @@
 import discord
 from common import db
 from discord.ext import commands
-from modules.utils import getchannel, getGuild, getUser, system_notification
+from modules.utils import getChannel, getGuild, getUser, system_notification
 
 
 class OnRawReactionAdd(commands.Cog):
@@ -34,7 +34,7 @@ class OnRawReactionAdd(commands.Cog):
                                           )
                 return
 
-            ch = await getchannel(self.bot, ch_id)
+            ch = await getChannel(self.bot, ch_id)
             msg = await ch.fetch_message(msg_id)
             user = await getUser(self.bot, user_id)
             if reaction not in reactions:
