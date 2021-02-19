@@ -1,11 +1,14 @@
 from sys import exit as shutdown
 
-from bot import bot
 from discord.ext import commands
 
 
-@commands.is_owner()
-@bot.command(name="kill")
-async def kill(ctx):
-    await ctx.send("Shutting down...")
-    shutdown()  # sys.exit()
+class Kill(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(name="kill")
+    @commands.is_owner()
+    async def kill(self, ctx):
+        await ctx.send("Shutting down...")
+        shutdown()  # sys.exit()

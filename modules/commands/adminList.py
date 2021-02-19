@@ -1,31 +1,38 @@
+
+from os import name
+
 import discord
-from bot import bot, db
+from common import db
 from discord.ext import commands
 from modules.utils import system_notification
 
 
-@bot.command(name="adminlist")
-@commands.has_permissions(administrator=True)
-async def list_admin(ctx):
-    # Lists all admin IDs in the database, mentioning them if possible
-    admin_ids = db.get_admins(ctx.guild.id)
+class AdminList(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
 
-    if isinstance(admin_ids, Exception):
-        await system_notification(
-            ctx.message.guild.id,
-            f"Database error when fetching admins:\n```\n{admin_ids}\n```",
-        )
-        return
+    @commands.command(name="adminlist")
+    @commands.has_permissions(administrator=True)
+    async def adminList(self, ctx):
+        # Lists all admin IDs in the database, mentioning them if possible
+        admin_ids = db.get_admins(ctx.guild.id)
 
-    adminrole_objects = []
-    for admin_id in admin_ids:
-        adminrole_objects.append(discord.utils.get(
-            ctx.guild.roles, id=admin_id).mention)
+        if isinstance(admin_ids, Exception):
+            await system_notification(self.bot,
+                                      ctx.message.guild.id,
+                                      f"Database error when fetching admins:\n```\n{admin_ids}\n```",
+                                      )
+            return
 
-    if adminrole_objects:
-        await ctx.send(
-            "The bot admins on this server are:\n- "
-            + "\n- ".join(adminrole_objects)
-        )
-    else:
-        await ctx.send("There are no bot admins registered in this server.")
+        adminrole_objects = []
+        for admin_id in admin_ids:
+            adminrole_objects.append(discord.utils.get(
+                ctx.guild.roles, id=admin_id).mention)
+
+        if adminrole_objects:
+            await ctx.send(
+                "The bot admins on this server are:\n- "
+                + "\n- ".join(adminrole_objects)
+            )
+        else:
+            await ctx.send("There are no bot admins registered in this server.")

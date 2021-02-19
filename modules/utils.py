@@ -2,12 +2,12 @@ import os
 from sys import platform
 
 import discord
-from bot import __version__, bot, db, db_file, directory, system_channel
+from common import __version__, db, db_file, directory, system_channel
 from core import schema
+from discord.ext.commands.bot import Bot
 
 
 def isAdmin(member, guild_id):
-    print('isAdmin called')
     # Checks if command author has an admin role that was added with rl!admin
     admins = db.get_admins(guild_id)
 
@@ -24,7 +24,7 @@ def isAdmin(member, guild_id):
         return False
 
 
-async def getchannel(id):
+async def getChannel(bot: Bot, id):
     channel = bot.get_channel(id)
 
     if not channel:
@@ -38,7 +38,7 @@ async def getchannel(id):
     return channel
 
 
-async def getguild(id):
+async def getGuild(bot: Bot, id):
     guild = bot.get_guild(id)
 
     if not guild:
@@ -47,7 +47,7 @@ async def getguild(id):
     return guild
 
 
-async def getuser(id):
+async def getUser(bot: Bot, id):
     user = bot.get_user(id)
 
     if not user:
@@ -64,31 +64,31 @@ def restart():
     cmd.close()
 
 
-async def database_updates():
+async def database_updates(bot: Bot):
     handler = schema.SchemaHandler(db_file, bot)
     if handler.version == 0:
         handler.zero_to_one()
         messages = db.fetch_all_messages()
         for message in messages:
             channel_id = message[1]
-            channel = await getchannel(channel_id)
+            channel = await getChannel(bot, channel_id)
             db.add_guild(channel.id, channel.guild.id)
 
     if handler.version == 1:
         handler.one_to_two()
 
 
-async def system_notification(guild_id, text):
+async def system_notification(bot, guild_id, text):
     # Send a message to the system channel (if set)
     if guild_id:
         server_channel = db.fetch_systemchannel(guild_id)
 
         if isinstance(server_channel, Exception):
-            await system_notification(
-                None,
-                "Database error when fetching guild system"
-                f" channels:\n```\n{server_channel}\n```\n\n{text}",
-            )
+            await system_notification(bot,
+                                      None,
+                                      "Database error when fetching guild system"
+                                      f" channels:\n```\n{server_channel}\n```\n\n{text}",
+                                      )
             return
 
         if server_channel:
@@ -96,18 +96,18 @@ async def system_notification(guild_id, text):
 
         if server_channel:
             try:
-                target_channel = await getchannel(server_channel)
+                target_channel = await getChannel(bot, server_channel)
                 await target_channel.send(text)
 
             except discord.Forbidden:
-                await system_notification(None, text)
+                await system_notification(bot, None, text)
 
         else:
-            await system_notification(None, text)
+            await system_notification(bot, None, text)
 
     elif system_channel:
         try:
-            target_channel = await getchannel(system_channel)
+            target_channel = await getChannel(bot, system_channel)
             await target_channel.send(text)
 
         except discord.NotFound:
@@ -120,13 +120,13 @@ async def system_notification(guild_id, text):
         print(text)
 
 
-async def formatted_channel_list(channel):
+async def formatted_channel_list(bot: Bot, channel):
     all_messages = db.fetch_messages(channel.id)
     if isinstance(all_messages, Exception):
-        await system_notification(
-            channel.guild.id,
-            f"Database error when fetching messages:\n```\n{all_messages}\n```",
-        )
+        await system_notification(bot,
+                                  channel.guild.id,
+                                  f"Database error when fetching messages:\n```\n{all_messages}\n```",
+                                  )
         return
 
     formatted_list = []
@@ -140,12 +140,12 @@ async def formatted_channel_list(channel):
             continue
 
         except discord.Forbidden:
-            await system_notification(
-                channel.guild.id,
-                "I do not have permissions to edit a reaction-role message"
-                f" that I previously created.\n\nID: {msg_id} in"
-                f" {channel.mention}",
-            )
+            await system_notification(bot,
+                                      channel.guild.id,
+                                      "I do not have permissions to edit a reaction-role message"
+                                      f" that I previously created.\n\nID: {msg_id} in"
+                                      f" {channel.mention}",
+                                      )
             continue
 
         entry = (
