@@ -7,8 +7,8 @@ class WelcomeChannel(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def welcomeChannel(self, ctx):
+    @commands.command(name="welcomeChannel")
+    async def setWelcomeChannel(self, ctx):
         if isAdmin(ctx.message.author, ctx.guild.id):
             mentioned_channels = ctx.message.channel_mentions
             target_channel = mentioned_channels[0].id

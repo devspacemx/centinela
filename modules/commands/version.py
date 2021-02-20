@@ -1,5 +1,4 @@
 from common import __version__
-from core import github
 from discord.ext import commands
 from modules.utils import isAdmin
 
@@ -11,7 +10,6 @@ class Version(commands.Cog):
     @commands.command()
     async def version(self, ctx):
         if isAdmin(ctx.message.author, ctx.guild.id):
-            latest = github.get_latest()
             await ctx.send(
                 f"I am currently running Centinela v{__version__}"
             )

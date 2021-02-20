@@ -7,7 +7,7 @@ from discord.ext import commands, tasks
 from discord.ext.commands.bot import Bot
 from modules.utils import database_updates, system_notification
 
-migrated = migration.migrate()
+# migrated = migration.migrate()
 config_migrated = migration.migrateconfig()
 
 
@@ -147,12 +147,12 @@ class OnReady(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print("Centinela ready!")
-        if migrated:
+        """if migrated:
             await system_notification(self.bot,
                                       None,
                                       "Your CSV files have been deleted and migrated to an SQLite"
                                       " `centinela.db` file.",
-                                      )
+                                      )"""
 
         if config_migrated:
             await system_notification(self.bot,

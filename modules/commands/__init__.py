@@ -14,6 +14,7 @@ from .reaction import *
 from .removeAdmin import *
 from .restart import *
 from .rmActivity import *
+from .starterRole import *
 from .systemChannel import *
 from .version import *
 from .welcomeChannel import *
@@ -37,3 +38,4 @@ def init(bot: Bot):
     bot.add_cog(RemoveAdmin(bot))
     bot.add_cog(Restart(bot))
     bot.add_cog(RemoveActivity(bot))
+    bot.add_cog(SetStarterRole(bot))

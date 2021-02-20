@@ -38,8 +38,10 @@ def initialize(database):
         "CREATE TABLE IF NOT EXISTS 'reactionroles' ('reactionrole_id' INT, 'reaction'"
         " NVCARCHAR, 'role_id' INT);"
     )
-    cursor.execute("CREATE TABLE IF NOT EXISTS 'admins' ('role_id' INT, 'guild_id' INT);")
-    cursor.execute("CREATE TABLE IF NOT EXISTS 'cleanup_queue_guilds' ('guild_id' INT, 'unix_timestamp' INT);")
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS 'admins' ('role_id' INT, 'guild_id' INT);")
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS 'cleanup_queue_guilds' ('guild_id' INT, 'unix_timestamp' INT);")
     cursor.execute("CREATE TABLE IF NOT EXISTS 'dbinfo' ('version' INT);")
     cursor.execute(
         "CREATE TABLE IF NOT EXISTS 'guild_settings' ('guild_id' INT, 'notify' INT, 'systemchannel' INT, 'welcomechannel' INT);"
@@ -77,19 +79,22 @@ class Database:
                     cursor.execute(
                         "INSERT INTO 'messages' ('message_id', 'channel', 'reactionrole_id',"
                         " 'guild_id') values(?, ?, ?, ?);",
-                        (rl_dict["message"]["message_id"], rl_dict["message"]["channel_id"], reactionrole_id, rl_dict["message"]["guild_id"]),
+                        (rl_dict["message"]["message_id"], rl_dict["message"]
+                         ["channel_id"], reactionrole_id, rl_dict["message"]["guild_id"]),
                     )
                     break
                 except sqlite3.IntegrityError:
                     continue
-            combos = [(reactionrole_id, reaction, role_id) for reaction, role_id in rl_dict["reactions"].items()]
-            cursor.executemany("INSERT INTO 'reactionroles' ('reactionrole_id', 'reaction', 'role_id') values(?, ?, ?);", combos)
+            combos = [(reactionrole_id, reaction, role_id)
+                      for reaction, role_id in rl_dict["reactions"].items()]
+            cursor.executemany(
+                "INSERT INTO 'reactionroles' ('reactionrole_id', 'reaction', 'role_id') values(?, ?, ?);", combos)
             conn.commit()
             cursor.close()
             conn.close()
         except sqlite3.Error as e:
             return e
-    
+
     def exists(self, message_id):
         try:
             conn = sqlite3.connect(self.database)
@@ -137,7 +142,8 @@ class Database:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT message_id FROM messages WHERE channel = ?;", (channel,)
+                "SELECT message_id FROM messages WHERE channel = ?;", (
+                    channel,)
             )
             all_messages_in_channel = []
             for row in cursor:
@@ -212,7 +218,8 @@ class Database:
                 (guild_id,),
             )
             # Delete the guilds potencial cleanup_queue entries
-            cursor.execute("DELETE FROM cleanup_queue_guilds WHERE guild_id=?;", (guild_id,))
+            cursor.execute(
+                "DELETE FROM cleanup_queue_guilds WHERE guild_id=?;", (guild_id,))
             conn.commit()
 
             cursor.close()
@@ -220,7 +227,7 @@ class Database:
 
         except sqlite3.Error as e:
             return e
-        
+
     def delete(self, message_id, guild_id=None):
         try:
             conn = sqlite3.connect(self.database)
@@ -260,7 +267,8 @@ class Database:
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO 'admins' ('role_id', 'guild_id') values(?,?);", (role_id, guild_id))
+            cursor.execute(
+                "INSERT INTO 'admins' ('role_id', 'guild_id') values(?,?);", (role_id, guild_id))
             conn.commit()
             cursor.close()
             conn.close()
@@ -272,7 +280,8 @@ class Database:
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM admins WHERE role_id = ? AND guild_id = ?;", (role_id, guild_id))
+            cursor.execute(
+                "DELETE FROM admins WHERE role_id = ? AND guild_id = ?;", (role_id, guild_id))
             conn.commit()
             cursor.close()
             conn.close()
@@ -284,7 +293,8 @@ class Database:
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM admins WHERE guild_id = ?;", (guild_id,))
+            cursor.execute(
+                "SELECT * FROM admins WHERE guild_id = ?;", (guild_id,))
             admins = []
             for row in cursor:
                 role_id = row[0]
@@ -297,11 +307,24 @@ class Database:
         except sqlite3.Error as e:
             return e
 
+    def add_starterRole(self, guild_id, role_id):
+        try:
+            conn = sqlite3.connect(self.database)
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE guild_settings SET starterrole = ? WHERE guild_id = ?;",
+                (role_id, guild_id),
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
+        except sqlite3.Error as e:
+            return e
+
     def add_welcomeChannel(self, guild_id, channel_id):
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            notify = 0
             cursor.execute(
                 "INSERT OR IGNORE INTO guild_settings ('guild_id', 'welcomechannel')"
                 " values(?, ?);",
@@ -339,7 +362,7 @@ class Database:
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            channel_id = 0 # Set to false
+            channel_id = 0  # Set to false
             notify = 0
             cursor.execute(
                 "INSERT OR IGNORE INTO guild_settings ('guild_id', 'notify', 'systemchannel')"
@@ -362,13 +385,31 @@ class Database:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT welcomechannel FROM guild_settings WHERE guild_id = ?;", (guild_id,)
+                "SELECT welcomechannel FROM guild_settings WHERE guild_id = ?;", (
+                    guild_id,)
             )
-            result = cursor.fetchall()
+            result = cursor.fetchone()
             cursor.close()
             conn.close()
             return result
 
+        except sqlite3.Error as e:
+            return e
+
+    def fetch_starterRole(self, guild_id):
+        try:
+            conn = sqlite3.connect(self.database)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT starterrole FROM guild_settings WHERE guild_id = ?;", (
+                    guild_id,)
+            )
+            result = cursor.fetchone()
+            print('ROLE RS')
+            print(result)
+            cursor.close()
+            conn.close()
+            return result
         except sqlite3.Error as e:
             return e
 
@@ -377,7 +418,8 @@ class Database:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT systemchannel FROM guild_settings WHERE guild_id = ?;", (guild_id,)
+                "SELECT systemchannel FROM guild_settings WHERE guild_id = ?;", (
+                    guild_id,)
             )
             result = cursor.fetchall()
             cursor.close()
@@ -408,7 +450,7 @@ class Database:
             for guild in guilds:
                 if guild[0] is not None:
                     guild_ids.append(guild[0])
-            
+
             cursor.close()
             conn.close()
             return guild_ids
@@ -472,7 +514,8 @@ class Database:
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO 'cleanup_queue_guilds' ('guild_id', 'unix_timestamp') values(?,?);", (guild_id, unix_timestamp))
+            cursor.execute(
+                "INSERT INTO 'cleanup_queue_guilds' ('guild_id', 'unix_timestamp') values(?,?);", (guild_id, unix_timestamp))
             conn.commit()
             cursor.close()
             conn.close()
@@ -485,7 +528,8 @@ class Database:
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM cleanup_queue_guilds WHERE guild_id=?;", (guild_id,))
+            cursor.execute(
+                "DELETE FROM cleanup_queue_guilds WHERE guild_id=?;", (guild_id,))
             conn.commit()
             cursor.close()
             conn.close()
@@ -521,22 +565,26 @@ class Database:
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            cursor.execute("SELECT notify FROM guild_settings WHERE guild_id = ?", (guild_id,))
+            cursor.execute(
+                "SELECT notify FROM guild_settings WHERE guild_id = ?", (guild_id,))
             results = cursor.fetchall()
             if not results:
                 # If the guild was not in the table because the command was never used before
                 notify = 1
                 systemchannel = 0
-                cursor.execute("INSERT INTO 'guild_settings' ('guild_id', 'notify') values(?, ?, ?);", (guild_id, systemchannel, notify))
+                cursor.execute(
+                    "INSERT INTO 'guild_settings' ('guild_id', 'notify') values(?, ?, ?);", (guild_id, systemchannel, notify))
             else:
                 notify = results[0][0]
                 if notify:
                     notify = 0
-                    cursor.execute("UPDATE guild_settings SET notify = ? WHERE guild_id = ?", (notify, guild_id))
+                    cursor.execute(
+                        "UPDATE guild_settings SET notify = ? WHERE guild_id = ?", (notify, guild_id))
 
                 else:
                     notify = 1
-                    cursor.execute("UPDATE guild_settings SET notify = ? WHERE guild_id = ?", (notify, guild_id))
+                    cursor.execute(
+                        "UPDATE guild_settings SET notify = ? WHERE guild_id = ?", (notify, guild_id))
             conn.commit()
             cursor.close()
             conn.close()
@@ -551,13 +599,15 @@ class Database:
         try:
             conn = sqlite3.connect(self.database)
             cursor = conn.cursor()
-            cursor.execute("SELECT notify FROM guild_settings WHERE guild_id = ?", (guild_id,))
+            cursor.execute(
+                "SELECT notify FROM guild_settings WHERE guild_id = ?", (guild_id,))
             results = cursor.fetchall()
             if not results:
                 # If the guild was not in the table because the command was never used before
                 notify = 0
                 systemchannel = 0
-                cursor.execute("INSERT INTO 'guild_settings' ('guild_id', `systemchannel`, 'notify') values(?, ?, ?);", (guild_id, systemchannel, notify))
+                cursor.execute(
+                    "INSERT INTO 'guild_settings' ('guild_id', `systemchannel`, 'notify') values(?, ?, ?);", (guild_id, systemchannel, notify))
             else:
                 notify = results[0][0]
             cursor.close()

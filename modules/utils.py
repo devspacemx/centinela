@@ -73,9 +73,10 @@ async def database_updates(bot: Bot):
             channel_id = message[1]
             channel = await getChannel(bot, channel_id)
             db.add_guild(channel.id, channel.guild.id)
-
     if handler.version == 1:
         handler.one_to_two()
+    if handler.version == 2:
+        handler.two_to_three()
 
 
 async def system_notification(bot, guild_id, text):

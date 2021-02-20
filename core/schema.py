@@ -24,6 +24,7 @@ SOFTWARE.
 
 
 import sqlite3
+
 import discord
 
 
@@ -53,11 +54,13 @@ class SchemaHandler:
         if version > 0:
             previous = version - 1
             cursor.execute(
-                "UPDATE dbinfo SET version = ? WHERE version = ?;", (version, previous)
+                "UPDATE dbinfo SET version = ? WHERE version = ?;", (
+                    version, previous)
             )
 
         else:
-            cursor.execute("INSERT INTO dbinfo(version) values(?);", (version,))
+            cursor.execute(
+                "INSERT INTO dbinfo(version) values(?);", (version,))
 
         conn.commit()
         cursor.close()
@@ -103,11 +106,13 @@ class SchemaHandler:
             conn.commit()
             for guild in guilds:
                 for admin_id in guilds[guild]:
-                    cursor.execute("UPDATE admins SET guild_id = ? WHERE role_id = ?;", (guild, admin_id))
+                    cursor.execute(
+                        "UPDATE admins SET guild_id = ? WHERE role_id = ?;", (guild, admin_id))
             cursor.execute("DELETE FROM admins WHERE guild_id IS NULL;")
             conn.commit()
 
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='systemchannels';")
+        cursor.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='systemchannels';")
         systemchannels_table = cursor.fetchall()
         if systemchannels_table:
             cursor.execute("SELECT * FROM systemchannels;")
@@ -115,11 +120,26 @@ class SchemaHandler:
             for entry in entries:
                 guild_id = entry[0]
                 channel_id = entry[1]
-                notify = 0 # Set default to not notify
-                cursor.execute("INSERT INTO guild_settings ('guild_id', 'notify', 'systemchannel') values(?, ?, ?);", (guild_id, notify, channel_id))
+                notify = 0  # Set default to not notify
+                cursor.execute(
+                    "INSERT INTO guild_settings ('guild_id', 'notify', 'systemchannel') values(?, ?, ?);", (guild_id, notify, channel_id))
             cursor.execute("DROP TABLE systemchannels;")
             conn.commit()
 
         cursor.close()
         conn.close()
         self.set_version(2)
+
+    def two_to_three(self):
+        conn = sqlite3.connect(self.database)
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(guild_settings);")
+        result = cursor.fetchall()
+        columns = [value[1] for value in result]
+        if "starterrole" not in columns:
+            cursor.execute(
+                "ALTER TABLE guild_settings ADD COLUMN 'starterrole' INT;")
+            conn.commit()
+        cursor.close()
+        conn.close()
+        self.set_version(3)
