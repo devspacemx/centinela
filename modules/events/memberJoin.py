@@ -19,4 +19,4 @@ class MemberJoin(commands.Cog):
         if role is not None:
             await member.add_roles(role)
         if channel is not None:
-            await channel.send(f"¡Bienvenid@ **{member.name}** a la comunidad **DevSpace**! :wave:")
+            await channel.send(f"¡Te damos la bienvenida! **@{member.name}** a la comunidad **DevSpace** :wave:")
